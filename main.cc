@@ -129,6 +129,7 @@ auto parse_heap_size(const std::string& str) -> size_t {
         std::fprintf(stderr, "Invalid heap size: %s\n", str.c_str());
         print_usage(true);
     }
+
     return heap_size;
 }
 
@@ -138,6 +139,7 @@ auto parse_base_addr(const std::string& str) -> size_t {
         std::fprintf(stderr, "Invalid base address: %s\n", str.c_str());
         print_usage(true);
     }
+
     return base_addr;
 }
 
@@ -174,27 +176,22 @@ auto parse_order(const std::string& order) -> ListOrder {
 }
 
 auto parse_ops(const std::string& ops) -> std::vector<MemOp> {
-    if (ops.empty()) {
-        std::fprintf(stderr, "Invalid ops list: empty\n");
-        print_usage(true);
-    }
-
-    auto opslist = std::vector<MemOp>{};
+    auto oplist = std::vector<MemOp>{};
 
     auto strlist = split_string(ops, ",");
     for (const auto& op : strlist) {
-        size_t size = std::stoi(op.substr(1));
-        if (size <= 0) {
-            std::fprintf(stderr, "Invalid mem-op size: %s\n", op.c_str());
-            print_usage(true);
-        }
-
+        // num is size when allocating, and index of allocated chunk when freeing
+        size_t num = std::stoi(op.substr(1));
         switch (op[0]) {
             case '+':
-                opslist.push_back(MemOp(Op::Alloc, size));
+                if (num <= 0) {
+                    std::fprintf(stderr, "Invalid mem-op size: %s\n", op.c_str());
+                    print_usage(true);
+                }
+                oplist.push_back(MemOp(Op::Alloc, num));
                 break;
             case '-':
-                opslist.push_back(MemOp(Op::Free, size));
+                oplist.push_back(MemOp(Op::Free, num));
                 break;
             default:
                 std::fprintf(stderr, "Invalid mem-op: %s\n", op.c_str());
@@ -202,12 +199,16 @@ auto parse_ops(const std::string& ops) -> std::vector<MemOp> {
         }
     }
 
-    return opslist;
+    return oplist;
 }
 
 auto exec_memops(const std::vector<MemOp>& ops, std::unique_ptr<Allocator> allocator) -> void {
-    std::vector<Chunk> allocated{};
+    if (ops.empty()) {
+        std::fprintf(stderr, "Invalid mem-ops: no op found.\n");
+        print_usage(true);
+    }
 
+    std::vector<Chunk> allocated{};
     for (const auto& op : ops) {
         switch (op.op()) {
             case Op::Alloc: {
@@ -305,6 +306,5 @@ auto main(int argc, char** argv) -> int {
     }
 
     exec_memops(ops, std::forward<std::unique_ptr<Allocator>>(allocator));
-
-    return 0;
+    return EXIT_SUCCESS;
 }
