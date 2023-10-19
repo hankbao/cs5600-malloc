@@ -182,18 +182,19 @@ auto parse_ops(const std::string& ops) -> std::vector<MemOp> {
     auto strlist = split_string(ops, ",");
     for (const auto& op : strlist) {
         // num is size when allocating, and index of allocated chunk when freeing
-        size_t num = std::stoi(op.substr(1));
         switch (op[0]) {
-            case '+':
+            case '+': {
+                size_t num = std::stoi(op.substr(1));
                 if (num <= 0) {
                     std::fprintf(stderr, "Invalid mem-op size: %s\n", op.c_str());
                     print_usage(true);
                 }
                 oplist.push_back(MemOp(Op::Alloc, num));
-                break;
-            case '-':
+            } break;
+            case '-': {
+                size_t num = std::stoi(op.substr(1));
                 oplist.push_back(MemOp(Op::Free, num));
-                break;
+            } break;
             default:
                 std::fprintf(stderr, "Invalid mem-op: %s\n", op.c_str());
                 print_usage(true);
