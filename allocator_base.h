@@ -11,7 +11,7 @@
 class AllocatorBase : public Allocator {
    public:
     AllocatorBase(size_t base, size_t size, bool coalesce, ListOrder order)
-        : base_{base}, size_{size}, coalesce_{coalesce}, order_{order}, searched_{0}, freelist_{} {
+        : Allocator{}, base_{base}, size_{size}, coalesce_{coalesce}, order_{order}, searched_{0}, freelist_{} {
         freelist_.emplace_front(base, size);
     }
     virtual ~AllocatorBase() = default;

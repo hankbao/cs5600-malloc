@@ -8,7 +8,7 @@
 
 class AllocatorFirst : public AllocatorBase {
    public:
-    AllocatorFirst(size_t base, size_t size, bool coalesce, ListOrder order = ListOrder::AddrSort)
+    AllocatorFirst(size_t base, size_t size, bool coalesce, ListOrder order)
         : AllocatorBase{base, size, coalesce, order} {};
     virtual ~AllocatorFirst() = default;
 

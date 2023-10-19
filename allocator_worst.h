@@ -8,7 +8,7 @@
 
 class AllocatorWorst : public AllocatorBase {
    public:
-    AllocatorWorst(size_t base, size_t size, bool coalesce, ListOrder order = ListOrder::AddrSort)
+    AllocatorWorst(size_t base, size_t size, bool coalesce, ListOrder order)
         : AllocatorBase{base, size, coalesce, order} {};
     virtual ~AllocatorWorst() = default;
 

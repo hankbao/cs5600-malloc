@@ -8,7 +8,7 @@
 
 class AllocatorBest : public AllocatorBase {
    public:
-    AllocatorBest(size_t base, size_t size, bool coalesce, ListOrder order = ListOrder::AddrSort)
+    AllocatorBest(size_t base, size_t size, bool coalesce, ListOrder order)
         : AllocatorBase{base, size, coalesce, order} {};
     virtual ~AllocatorBest() = default;
 

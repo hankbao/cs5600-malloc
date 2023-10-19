@@ -8,8 +8,8 @@
 
 class AllocatorNext : public AllocatorBase {
    public:
-    AllocatorNext(size_t base, size_t size, bool coalesce, ListOrder order = ListOrder::AddrSort)
         : AllocatorBase{base, size, coalesce, order}, last_{freelist_.begin()} {};
+    AllocatorNext(size_t base, size_t size, bool coalesce, ListOrder order)
     virtual ~AllocatorNext() = default;
 
     virtual auto malloc(size_t size) -> Chunk override;
