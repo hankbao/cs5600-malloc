@@ -17,13 +17,12 @@ auto AllocatorNext::malloc(size_t size) -> Chunk {
     ++last_;  // move to the next chunk
     auto it = last_;
     do {
-        ++searched_;
-
         if (it == freelist_.end()) {
             it = freelist_.begin();
             continue;
         }
 
+        ++searched_;
         if (it->size() >= size) {
             fit = it;
             break;
