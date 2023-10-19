@@ -44,7 +44,10 @@ auto AllocatorBase::free(Chunk chunk) -> void {
     if (coalesce_) {
         for (auto current = freelist_.begin(); current != freelist_.end(); ++current) {
             for (auto it = freelist_.begin(); it != freelist_.end();) {
-                if (it == current) continue;
+                if (it == current) {
+                    ++it;
+                    continue;
+                }
 
                 if (current->base() + current->size() == it->base()) {
                     current->expand(it->size());
