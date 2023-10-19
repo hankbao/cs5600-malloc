@@ -31,15 +31,17 @@ enum class Op {
 
 class MemOp {
    public:
-    MemOp(Op op, size_t size) : op_{op}, size_{size} {};
+    MemOp(Op op, size_t num) : op_{op}, num_{num} {};
     ~MemOp() = default;
 
     auto op() const -> Op { return op_; }
-    auto size() const -> size_t { return size_; }
+
+    // num is size when allocating, and index of allocated chunk when freeing
+    auto num() const -> size_t { return num_; }
 
    private:
     Op op_;
-    size_t size_;
+    size_t num_;
 };
 
 [[noreturn]] auto print_usage(bool onerror) -> void {
@@ -159,9 +161,9 @@ auto exec_memops(const std::vector<MemOp>& ops, std::unique_ptr<Allocator> alloc
     for (const auto& op : ops) {
         switch (op.op()) {
             case Op::Alloc: {
-                auto c = allocator->malloc(op.size());
+                auto c = allocator->malloc(op.num());
                 if (c.is_null()) {
-                    std::fprintf(stderr, "Failed to allocate %zu bytes\n", op.size());
+                    std::fprintf(stderr, "Failed to allocate %zu bytes\n", op.num());
                     ::exit(EXIT_FAILURE);
                 }
                 allocated.push_back(c);
@@ -170,7 +172,7 @@ auto exec_memops(const std::vector<MemOp>& ops, std::unique_ptr<Allocator> alloc
             } break;
 
             case Op::Free: {
-                auto c = allocated.at(allocated.size());
+                auto c = allocated.at(op.num());
                 allocator->free(c);
 
                 // TODO: print
