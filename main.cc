@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -72,6 +73,54 @@ auto split_string(const std::string& s, const std::string& delimiter) -> std::ve
 
     result.push_back(s.substr(start, end));
     return result;
+}
+
+auto policy_to_str(Policy policy) -> std::string {
+    switch (policy) {
+        case Policy::BestFit:
+            return "BEST";
+        case Policy::WorstFit:
+            return "WORST";
+        case Policy::FirstFit:
+            return "FIRST";
+        case Policy::NextFit:
+            return "NEXT";
+    }
+}
+
+auto order_to_str(ListOrder order) -> std::string {
+    switch (order) {
+        case ListOrder::AddrSort:
+            return "ADDRSORT";
+        case ListOrder::SizeSortAsc:
+            return "SIZESORT+";
+        case ListOrder::SizeSortDesc:
+            return "SIZESORT-";
+        case ListOrder::InsertFront:
+            return "INSERT-FRONT";
+        case ListOrder::InsertBack:
+            return "INSERT-BACK";
+    }
+}
+
+auto op_to_str(Op op) -> std::string {
+    switch (op) {
+        case Op::Alloc:
+            return "+";
+        case Op::Free:
+            return "-";
+    }
+}
+
+auto ops_to_str(const std::vector<MemOp>& ops) -> std::string {
+    std::stringstream ss;
+    auto it = ops.cbegin();
+    ss << op_to_str(it->op()) << it->num();
+    ++it;
+    for (; it != ops.cend(); ++it) {
+        ss << "," << op_to_str(it->op()) << it->num();
+    }
+    return ss.str();
 }
 
 auto parse_heap_size(const std::string& str) -> size_t {
@@ -186,9 +235,9 @@ auto main(int argc, char** argv) -> int {
     int opt;
     size_t heap_size = 100;
     size_t base_addr = 1000;
-    bool coalesce = false;
     Policy policy = Policy::BestFit;
     ListOrder order = ListOrder::AddrSort;
+    bool coalesce = false;
     std::vector<MemOp> ops{};
 
     struct option long_options[] = {
@@ -229,6 +278,13 @@ auto main(int argc, char** argv) -> int {
                 print_usage(true);
         }
     }
+
+    std::printf("base_addr: %lu\n", base_addr);
+    std::printf("heap_size: %lu\n", heap_size);
+    std::printf("policy: %s\n", policy_to_str(policy).c_str());
+    std::printf("order: %s\n", order_to_str(order).c_str());
+    std::printf("coalesce: %s\n", coalesce ? "true" : "false");
+    std::printf("mem-ops: %s\n", ops_to_str(ops).c_str());
 
     std::unique_ptr<Allocator> allocator = nullptr;
     switch (policy) {
