@@ -42,7 +42,7 @@ class MemOp {
     size_t size_;
 };
 
-auto print_usage(bool onerror) -> void {
+[[noreturn]] auto print_usage(bool onerror) -> void {
     std::puts("Usage: malloc  [OPTIONS]...");
     std::puts("Supported options:");
     std::puts("-s, --size=HEAPSIZE");
@@ -54,6 +54,21 @@ auto print_usage(bool onerror) -> void {
     std::puts("-h, --help");
 
     ::exit(onerror ? EXIT_FAILURE : EXIT_SUCCESS);
+}
+
+auto split_string(const std::string& s, const std::string& delimiter) -> std::vector<std::string> {
+    std::vector<std::string> result;
+    size_t start = 0;
+    size_t end = s.find(delimiter);
+
+    while (end != std::string::npos) {
+        result.push_back(s.substr(start, end - start));
+        start = end + delimiter.length();
+        end = s.find(delimiter, start);
+    }
+
+    result.push_back(s.substr(start, end));
+    return result;
 }
 
 auto parse_heap_size(const std::string& str) -> size_t {
@@ -107,6 +122,11 @@ auto parse_order(const std::string& order) -> ListOrder {
 }
 
 auto parse_ops(const std::string& ops) -> std::vector<MemOp> {
+    if (ops.empty()) {
+        std::fprintf(stderr, "Invalid ops list: empty\n");
+        print_usage(true);
+    }
+
     auto opslist = std::vector<MemOp>{};
 
     auto strlist = split_string(ops, ",");
@@ -122,7 +142,7 @@ auto parse_ops(const std::string& ops) -> std::vector<MemOp> {
                 opslist.push_back(MemOp(Op::Alloc, size));
                 break;
             case '-':
-                opslist.push_back(MemOp(Op::Free, size)));
+                opslist.push_back(MemOp(Op::Free, size));
                 break;
             default:
                 std::fprintf(stderr, "Invalid mem-op: %s\n", op.c_str());
@@ -133,27 +153,12 @@ auto parse_ops(const std::string& ops) -> std::vector<MemOp> {
     return opslist;
 }
 
-auto split_string(const std::string& s, const std::string& delimiter) -> std::vector<std::string> {
-    std::vector<std::string> result;
-    size_t start = 0;
-    size_t end = s.find(delimiter);
-
-    while (end != std::string::npos) {
-        result.push_back(s.substr(start, end - start));
-        start = end + delimiter.length();
-        end = s.find(delimiter, start);
-    }
-
-    result.push_back(s.substr(start, end));
-    return result;
-}
-
 auto exec_memops(const std::vector<MemOp>& ops, std::unique_ptr<Allocator> allocator) -> void {
     std::vector<Chunk> allocated{};
 
     for (const auto& op : ops) {
         switch (op.op()) {
-            case Op::Alloc:
+            case Op::Alloc: {
                 auto c = allocator->malloc(op.size());
                 if (c.is_null()) {
                     fprintf(stderr, "Failed to allocate %zu bytes\n", op.size());
@@ -162,14 +167,14 @@ auto exec_memops(const std::vector<MemOp>& ops, std::unique_ptr<Allocator> alloc
                 allocated.push_back(c);
 
                 // TODO: print
-                break;
+            } break;
 
-            case Op::Free:
+            case Op::Free: {
                 auto c = allocated.at(allocated.size());
                 allocator->free(c);
 
                 // TODO: print
-                break;
+            } break;
         }
     }
 }
@@ -184,14 +189,14 @@ auto main(int argc, char** argv) -> int {
     std::vector<MemOp> ops{};
 
     struct option long_options[] = {
-        {"size", required_argument, 0, 's'},
-        {"baseAddr", required_argument, 0, 'b'},
-        {"policy", required_argument, 0, 'p'},
-        {"order", required_argument, 0, 'o'},
+        {"size", required_argument, nullptr, 's'},
+        {"baseAddr", required_argument, nullptr, 'b'},
+        {"policy", required_argument, nullptr, 'p'},
+        {"order", required_argument, nullptr, 'o'},
         {"coalesce", no_argument, 0, 'c'},
-        {"allocList", required_argument, 0, 'a'},
-        {"help", no_argument, 0, 'h'},
-        {0, 0, 0, 0}};
+        {"allocList", required_argument, nullptr, 'a'},
+        {"help", no_argument, nullptr, 'h'},
+        {nullptr, 0, nullptr, 0}};
 
     while ((opt = getopt_long(argc, argv, "s:b:p:o:ca:h", long_options, NULL)) != -1) {
         switch (opt) {
@@ -240,7 +245,7 @@ auto main(int argc, char** argv) -> int {
             break;
     }
 
-    exec_memops(ops, std::forward(allocator));
+    exec_memops(ops, std::forward<std::unique_ptr<Allocator>>(allocator));
 
     return 0;
 }

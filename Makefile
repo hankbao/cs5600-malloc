@@ -7,7 +7,7 @@ clean:
 	rm -f malloc *.o
 
 malloc: main.o allocator_base.o allocator_best.o allocator_worst.o allocator_first.o allocator_next.o
-	$(CC) $(CXXFLAGS) -o malloc main.o allocator_best.o
+	$(CC) $(CXXFLAGS) -o malloc main.o allocator_base.o allocator_best.o allocator_worst.o allocator_first.o allocator_next.o
 
 main.o: main.cc allocator_best.h
 	$(CC) $(CXXFLAGS) -c main.cc

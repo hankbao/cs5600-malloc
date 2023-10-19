@@ -16,7 +16,7 @@ auto AllocatorBase::free(Chunk chunk) -> void {
         case ListOrder::InsertFront:
             freelist_.push_front(chunk);
             break;
-        case ListOrder::AddrSort:
+        case ListOrder::AddrSort: {
             auto it = std::lower_bound(freelist_.begin(), freelist_.end(), chunk,
                                        [](const Chunk& a, const Chunk& c) {
                                            return a.base() < c.base();
@@ -24,20 +24,21 @@ auto AllocatorBase::free(Chunk chunk) -> void {
             // --it means one position before it
             // inserting is okay even if it is end()
             freelist_.insert(--it, chunk);
-            break;
-        case ListOrder::SizeSortAsc:
+        } break;
+        case ListOrder::SizeSortAsc: {
             auto it = std::lower_bound(freelist_.begin(), freelist_.end(), chunk,
                                        [](const Chunk& a, const Chunk& c) {
                                            return a.size() < c.size();
                                        });
             freelist_.insert(--it, chunk);
-            break;
-        case ListOrder::SizeSortDesc:
+        } break;
+        case ListOrder::SizeSortDesc: {
             auto it = std::lower_bound(freelist_.begin(), freelist_.end(), chunk,
                                        [](const Chunk& a, const Chunk& c) {
                                            return a.size() > c.size();
                                        });
             freelist_.insert(--it, chunk);
+        }
     }
 
     if (coalesce_) {
