@@ -45,15 +45,16 @@ class MemOp {
 };
 
 [[noreturn]] auto print_usage(bool onerror) -> void {
-    std::puts("Usage: malloc  [OPTIONS]...");
+    std::puts("Usage: malloc [OPTIONS]...\n");
     std::puts("Supported options:");
-    std::puts("-s, --size=HEAPSIZE");
-    std::puts("-b, --baseAddr=BASEADDR");
-    std::puts("-p, --policy=POLICY");
-    std::puts("-o, --order=ORDER");
-    std::puts("-c, --coalesce");
-    std::puts("-a, --allocList=OPSLIST");
-    std::puts("-h, --help");
+    std::puts("-s, --size=HEAPSIZE\n\tsize of the heap");
+    std::puts("-b, --base=BASEADDR\n\tbase address of heap");
+    std::puts("-p, --policy=POLICY\n\tlist search (BEST, WORST, FIRST, NEXT)");
+    std::puts(
+        "-o, --order=ORDER\n\tlist order (ADDRSORT, SIZESORT+, SIZESORT-, INSERT-FRONT, INSERT-BACK)");
+    std::puts("-c, --coalesce\n\tcoalesce the free list");
+    std::puts("-a, --memops=OPSLIST\n\tlist of ops (+10,-0,etc)");
+    std::puts("-h, --help\n\tprint usage message and exit");
 
     ::exit(onerror ? EXIT_FAILURE : EXIT_SUCCESS);
 }
@@ -192,11 +193,11 @@ auto main(int argc, char** argv) -> int {
 
     struct option long_options[] = {
         {"size", required_argument, nullptr, 's'},
-        {"baseAddr", required_argument, nullptr, 'b'},
+        {"base", required_argument, nullptr, 'b'},
         {"policy", required_argument, nullptr, 'p'},
         {"order", required_argument, nullptr, 'o'},
         {"coalesce", no_argument, 0, 'c'},
-        {"allocList", required_argument, nullptr, 'a'},
+        {"memops", required_argument, nullptr, 'a'},
         {"help", no_argument, nullptr, 'h'},
         {nullptr, 0, nullptr, 0}};
 
