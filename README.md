@@ -21,13 +21,21 @@ Order supported:
 $ make malloc
 
 $ ./malloc -h
-Usage: malloc  [OPTIONS]...
+Usage: malloc [OPTIONS]...
+
 Supported options:
 -s, --size=HEAPSIZE
--b, --baseAddr=BASEADDR
+	size of the heap
+-b, --base=BASEADDR
+	base address of heap
 -p, --policy=POLICY
+	list search (BEST, WORST, FIRST, NEXT)
 -o, --order=ORDER
+	list order (ADDRSORT, SIZESORT+, SIZESORT-, INSERT-FRONT, INSERT-BACK)
 -c, --coalesce
--a, --allocList=OPSLIST
+	coalesce the free list
+-a, --memops=OPSLIST
+	list of ops (+10,-0,etc)
 -h, --help
+	print usage message and exit
 ```
