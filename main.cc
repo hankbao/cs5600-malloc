@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <memory>
+#include <set>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -209,6 +210,8 @@ auto exec_memops(const std::vector<MemOp>& ops, std::unique_ptr<Allocator> alloc
     }
 
     std::vector<Chunk> allocated{};
+    std::set<size_t> freed{};
+
     for (const auto& op : ops) {
         switch (op.op()) {
             case Op::Alloc: {
@@ -234,9 +237,19 @@ auto exec_memops(const std::vector<MemOp>& ops, std::unique_ptr<Allocator> alloc
                     ::exit(EXIT_FAILURE);
                 }
 
+                // double-free detection
+                auto it = freed.find(idx);
+                if (it != freed.end()) {
+                    std::fprintf(stderr, "Double-free detected on index: %lu\n", op.num());
+                    ::exit(EXIT_FAILURE);
+                }
+
                 auto c = allocated.at(idx);
                 std::printf("Free(ptr[%lu]) at %lu\n", idx, c.base());
                 allocator->free(c);
+
+                // mark the index as freed
+                freed.insert(idx);
             } break;
         }
 
