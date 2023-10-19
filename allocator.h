@@ -22,6 +22,7 @@ class Allocator {
     virtual auto malloc(size_t size) -> Chunk = 0;
     virtual auto free(Chunk chunk) -> void = 0;
 
+    virtual auto last_searched() const -> size_t = 0;
     virtual auto print_status() -> void = 0;
 
    private:

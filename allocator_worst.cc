@@ -6,13 +6,17 @@
 
 // Find the biggest free chunk to fit the given size.
 auto AllocatorWorst::malloc(size_t size) -> Chunk {
+    searched_ = 0;
+
     if (0 == size) {
         return Chunk{0, 0};  // {0, 0} as null
     }
 
-    // search for the best fit
+    // search for the biggest fit
     auto fit = freelist_.end();
     for (auto it = freelist_.begin(); it != freelist_.end(); ++it) {
+        ++searched_;
+
         if (it->size() >= size) {
             if (fit == freelist_.end()) {
                 fit = it;

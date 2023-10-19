@@ -6,6 +6,8 @@
 
 // Find the fisrt free chunk to fit the given size.
 auto AllocatorFirst::malloc(size_t size) -> Chunk {
+    searched_ = 0;
+
     if (0 == size) {
         return Chunk{0, 0};  // {0, 0} as null
     }
@@ -13,6 +15,8 @@ auto AllocatorFirst::malloc(size_t size) -> Chunk {
     // search for the first fit
     auto fit = freelist_.end();
     for (auto it = freelist_.begin(); it != freelist_.end(); ++it) {
+        ++searched_;
+
         if (it->size() >= size) {
             fit = it;
             break;

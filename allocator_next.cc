@@ -6,15 +6,19 @@
 
 // Find the next free chunk to fit the given size according to last search.
 auto AllocatorNext::malloc(size_t size) -> Chunk {
+    searched_ = 0;
+
     if (0 == size) {
         return Chunk{0, 0};  // {0, 0} as null
     }
 
-    // search for the first fit
+    // search for the next fit
     auto fit = freelist_.end();
     ++last_;  // move to the next chunk
     auto it = last_;
     do {
+        ++searched_;
+
         if (it == freelist_.end()) {
             it = freelist_.begin();
             continue;

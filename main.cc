@@ -213,22 +213,34 @@ auto exec_memops(const std::vector<MemOp>& ops, std::unique_ptr<Allocator> alloc
         switch (op.op()) {
             case Op::Alloc: {
                 auto c = allocator->malloc(op.num());
+
+                // allocation failed if null chunk returned
                 if (c.is_null()) {
-                    std::fprintf(stderr, "Failed to allocate %zu bytes\n", op.num());
+                    std::fprintf(stderr, "Failed to allocate %lu bytes\n", op.num());
                     ::exit(EXIT_FAILURE);
                 }
-                allocated.push_back(c);
 
-                // TODO: print
+                auto searched = allocator->last_searched();
+                std::printf("ptr[%lu] = Alloc(%lu) returned %lu (searched %lu %s)\n",
+                            allocated.size(), c.size(), c.base(), searched,
+                            searched > 1 ? "elements" : "element");
+                allocated.push_back(c);
             } break;
 
             case Op::Free: {
-                auto c = allocated.at(op.num());
-                allocator->free(c);
+                auto idx = op.num();
+                if (idx >= allocated.size()) {
+                    std::fprintf(stderr, "Invalid free index: %lu\n", op.num());
+                    ::exit(EXIT_FAILURE);
+                }
 
-                // TODO: print
+                auto c = allocated.at(idx);
+                std::printf("Free(ptr[%lu]) at %lu\n", idx, c.base());
+                allocator->free(c);
             } break;
         }
+
+        allocator->print_status();
     }
 }
 
@@ -286,6 +298,7 @@ auto main(int argc, char** argv) -> int {
     std::printf("order: %s\n", order_to_str(order).c_str());
     std::printf("coalesce: %s\n", coalesce ? "true" : "false");
     std::printf("mem-ops: %s\n", ops_to_str(ops).c_str());
+    std::puts("");
 
     std::unique_ptr<Allocator> allocator = nullptr;
     switch (policy) {

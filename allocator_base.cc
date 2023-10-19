@@ -61,9 +61,9 @@ auto AllocatorBase::free(Chunk chunk) -> void {
 }
 
 auto AllocatorBase::print_status() -> void {
-    std::printf("Free List [ Size: %lu]: ", freelist_.size());
+    std::printf("Free List [ Size: %lu ]: ", freelist_.size());
     for (auto& chunk : freelist_) {
-        std::printf("[ addr: %lu size: %lu ] ", chunk.base(), chunk.size());
+        std::printf("[ Base: %lu, Size: %lu ] ", chunk.base(), chunk.size());
     }
     std::puts("\n");
 }
