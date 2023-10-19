@@ -14,28 +14,42 @@ auto AllocatorNext::malloc(size_t size) -> Chunk {
     }
     searched_ = 0;
 
-    // search for the next fit
-    auto fit = freelist_.end();
-    ++last_;  // move to the next chunk
-    auto it = last_;
-    do {
+    // move to the next chunk
+    if (last_ >= freelist_.size()) {
+        last_ = 0;
+    }
+
+    std::printf("Next-fit: search from index %lu\n", freelist_.size() > 1 ? last_ + 1 : 0);
+
+    auto it = freelist_.begin();
+    for (size_t counter = last_ + 1; counter > 0; --counter) {
+        ++it;  // move to the next position
         if (it == freelist_.end()) {
             it = freelist_.begin();
-            continue;
+        }
+    }
+
+    // search for the next fit
+    auto fit = freelist_.end();
+    for (size_t counter = freelist_.size(); counter > 0; --counter) {
+        ++searched_;
+        ++last_;
+        if (last_ >= freelist_.size()) {
+            last_ = 0;
         }
 
-        ++searched_;
         if (it->size() >= size) {
             fit = it;
             break;
         }
 
         ++it;
-    } while (it != last_);  // one round of search
+        if (it == freelist_.end()) {
+            it = freelist_.begin();
+        }
+    }
 
     if (fit != freelist_.end()) {
-        last_ = fit;  // keep the last position
-
         // perfect fit
         if (fit->size() == size) {
             auto c = *fit;

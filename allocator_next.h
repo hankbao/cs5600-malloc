@@ -8,14 +8,14 @@
 
 class AllocatorNext : public AllocatorBase {
    public:
-        : AllocatorBase{base, size, coalesce, order}, last_{freelist_.begin()} {};
     AllocatorNext(size_t base, size_t size, bool coalesce, ListOrder order)
+        : AllocatorBase{base, size, coalesce, order}, last_{0} {};
     virtual ~AllocatorNext() = default;
 
     virtual auto malloc(size_t size) -> Chunk override;
 
    private:
-    std::list<Chunk>::iterator last_;
+    size_t last_;
 
     AllocatorNext(const AllocatorNext&) = delete;
     AllocatorNext& operator=(const AllocatorNext&) = delete;
