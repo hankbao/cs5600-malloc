@@ -161,7 +161,7 @@ auto exec_memops(const std::vector<MemOp>& ops, std::unique_ptr<Allocator> alloc
             case Op::Alloc: {
                 auto c = allocator->malloc(op.size());
                 if (c.is_null()) {
-                    fprintf(stderr, "Failed to allocate %zu bytes\n", op.size());
+                    std::fprintf(stderr, "Failed to allocate %zu bytes\n", op.size());
                     ::exit(EXIT_FAILURE);
                 }
                 allocated.push_back(c);
